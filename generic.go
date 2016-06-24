@@ -53,34 +53,34 @@ func TypeName(o interface{}) string {
 
 func IsNilOrEmpty(x interface{}) bool {
 	rv := reflect.Indirect(reflect.ValueOf(x))
-    k := rv.Kind()
-    if k==reflect.Slice{
-        return false
-    } else if k==reflect.String {
-        if x.(string)=="" {
-            return true
-        } else {
-            return false
-        }
-    } else if k==reflect.Struct{
-        return false
-    } else if k==reflect.Bool{
-        return false
-    } else if strings.HasPrefix(k.String(),"int") || strings.Contains(k.String(),"float") {
-        iszero := x == reflect.Zero(reflect.TypeOf(x)).Interface()
-        if iszero {
-            return true
-        } else {
-            return false
-        }
-    }
-    
-    invalid := !rv.IsValid() 
-    if invalid{
-        return false
-    }
-    
-    return rv.IsNil()
+	k := rv.Kind()
+	if k == reflect.Slice {
+		return false
+	} else if k == reflect.String {
+		if x.(string) == "" {
+			return true
+		} else {
+			return false
+		}
+	} else if k == reflect.Struct {
+		return false
+	} else if k == reflect.Bool {
+		return false
+	} else if strings.HasPrefix(k.String(), "int") || strings.Contains(k.String(), "float") {
+		iszero := x == reflect.Zero(reflect.TypeOf(x)).Interface()
+		if iszero {
+			return true
+		} else {
+			return false
+		}
+	}
+
+	invalid := !rv.IsValid()
+	if invalid {
+		return false
+	}
+
+	return rv.IsNil()
 }
 
 func IsNumber(o interface{}) bool {
@@ -88,26 +88,26 @@ func IsNumber(o interface{}) bool {
 	ts := strings.ToLower(v.Type().String())
 	if (strings.Contains(ts, "int") || strings.Contains(ts, "float")) && !strings.HasPrefix(ts, "interface{}") {
 		return true
-	} 
+	}
 	return false
 }
 
-func IsStringNumber(txt string, decsep string)(f float64, e error){
+func IsStringNumber(txt string, decsep string) (f float64, e error) {
 	hasDes := false
 	newtxt := "0"
 	decPoint := 0
 	//Printf("%v ", txt)
-	for _, c := range txt{
+	for _, c := range txt {
 		s := string(c)
-		if strings.Compare(s,"0")>=0 && strings.Compare(s,"9")<=0{
+		if strings.Compare(s, "0") >= 0 && strings.Compare(s, "9") <= 0 {
 			newtxt += s
 			if hasDes {
-				decPoint+=1
+				decPoint += 1
 			}
-		} else if s==decsep{
-			if !hasDes{
+		} else if s == decsep {
+			if !hasDes {
 				newtxt += "."
-				hasDes=true
+				hasDes = true
 			} else {
 				e = errors.New("IsStringNumber: Multiple decimal separator found")
 				return
@@ -118,11 +118,11 @@ func IsStringNumber(txt string, decsep string)(f float64, e error){
 			return
 		}
 	}
-	if strings.HasSuffix(newtxt,"."){
+	if strings.HasSuffix(newtxt, ".") {
 		newtxt += "0"
 	}
 	//Printfn("%v",newtxt)
-	f = ToFloat64(newtxt,decPoint,RoundingAuto)
+	f = ToFloat64(newtxt, decPoint, RoundingAuto)
 	return
 }
 
@@ -272,7 +272,7 @@ func Value2Interface(vi reflect.Value) interface{} {
 	vik := vi.Type().String()
 	if strings.Contains(vik, "string") {
 		return vi.String()
-	} else if strings.Contains(vik, "int") && !strings.Contains(vik, "interface") {
+	} else if (vik == "int" || vik == "int8" || vik == "int16" || vik == "int32" || strings.Contains(vik, "uint")) && !strings.Contains(vik, "interface") {
 		return int(vi.Int())
 	} else if strings.Contains(vik, "float") {
 		return vi.Float()
@@ -283,16 +283,16 @@ func Value2Interface(vi reflect.Value) interface{} {
 	}
 }
 
-func ExecFunc(fn interface{}, ins ...interface{})(outs []reflect.Value, e error){
-    rvfn := reflect.ValueOf(fn)
-    if rvfn.Kind()!=reflect.Func{
-        e=errors.New("Execfunc: First parameter should be a function")
-        return
-    }
-    var rvins []reflect.Value
-    for _, in := range ins{
-        rvins = append(rvins, reflect.ValueOf(in))
-    }
-    outs=rvfn.Call(rvins)
-    return
+func ExecFunc(fn interface{}, ins ...interface{}) (outs []reflect.Value, e error) {
+	rvfn := reflect.ValueOf(fn)
+	if rvfn.Kind() != reflect.Func {
+		e = errors.New("Execfunc: First parameter should be a function")
+		return
+	}
+	var rvins []reflect.Value
+	for _, in := range ins {
+		rvins = append(rvins, reflect.ValueOf(in))
+	}
+	outs = rvfn.Call(rvins)
+	return
 }
